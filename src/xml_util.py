@@ -40,16 +40,3 @@ def write_xml(path, image_size, boxes, int_label, folder='images'):
     save_path = path + '.xml'
     with open(save_path, 'wb') as temp_xml:
         temp_xml.write(xml_str)
-
-# if __name__ == '__main__':
-#     """
-#     for testing
-#     """
-
-#     folder = 'images'
-#     img = [im for im in os.scandir('images') if '000001' in im.name][0]
-#     objects = ['fidget_spinner']
-#     tl = [(10, 10)]
-#     br = [(100, 100)]
-#     savedir = 'annotations'
-#     write_xml(folder, img, objects, tl, br, savedir)

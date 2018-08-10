@@ -8,7 +8,23 @@ import vggish_input, params
 from boxes import calculate_boxes
 from xml_util import write_xml
 
+# This script does these things:
+# 1. Looks for an audio dataset,
+# 2. Uses the names of subfolders as labels
+# 3. Loads the audio in the subfolders
+# 4. Converts it to mono and resamples if needed
+# 5. Extracts spectrograms from the audio data
+# 6. Saves spectrograms as images for YOLO training
+# 7. Extracts 3D points from spectrograms and filters them by amplitude
+# 8. Runs K-Means on points to find clusters
+# 9. Uses clusters to get the center and coordinates of bounding boxes
+# 10. Uses the name of the folder where the audio is from as a label for each bounding box
+# 11. Saves bounding boxes as annotations to .xml, the preferred PASCAL VOC format for YOLO TRAINING
+
 plt.rcParams['figure.dpi'] = 100
+
+# Seed for reproducible generation of train / test sets
+# only for development purposes
 np.random.seed(5239)
 
 file_names = []
@@ -18,7 +34,6 @@ labels = []
 # Different slashes for Windows OS
 slash = '\\' if os.name == 'nt' else '/'
 
-# Get the audio directory path, place yours here
 audio_path = os.path.dirname(params.AUDIO_PATH)
 
 # Get the names and paths of all params.FILE_EXTENSION files in the audio folder
@@ -102,7 +117,7 @@ for file_number, audio_file_path in enumerate(audio_file_paths):
         input_batch = vggish_input.waveform_to_examples(audio_data, sample_rate)
 
         for spectrogram_number, spectrogram in enumerate(input_batch):
-            # Save Spectrogram image for YOLO training
+            # Save Spectrogram image in the right shape for YOLO training
             spectrogram_for_picture = np.flip(np.rot90(spectrogram, 1), 0)
 
             boxes = calculate_boxes(spectrogram)
@@ -148,24 +163,24 @@ for file_number, audio_file_path in enumerate(audio_file_paths):
                 xml_path = os.path.join(result_root, train_or_test_folder, 'annotations', file_name)
                 write_xml(xml_path, image_size, boxes, event_label)
 
-                # # Uncomment this to save presentational plots to '../plots'
-                # fig = plt.figure()
-                # ax = fig.add_subplot(111)
-                # plt.title('Significant Parts of {}'.format(event_label))
-                # ax.set_xlabel('Frames (10ms each)')
-                # ax.set_ylabel('Frequency Bands')
-                # ax.imshow(spectrogram_for_picture, origin='lower')
+                # Save presentational plots to '../plots' Comment this to save processing
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
+                plt.title('Significant Parts of {}'.format(event_label))
+                ax.set_xlabel('Frames (10ms each)')
+                ax.set_ylabel('Frequency Bands')
+                ax.imshow(spectrogram_for_picture, origin='lower')
 
-                # for box in boxes:
-                #     left, right, bottom, top = box
-                #     width = right - left
-                #     height = top - bottom
+                for box in boxes:
+                    left, right, bottom, top = box
+                    width = right - left
+                    height = top - bottom
 
-                #     rectangle = patches.Rectangle((left, bottom), width, height, linewidth=1, edgecolor='r', facecolor='none')
-                #     ax.add_patch(rectangle)
+                    rectangle = patches.Rectangle((left, bottom), width, height, linewidth=1, edgecolor='r', facecolor='none')
+                    ax.add_patch(rectangle)
 
-                # plt.savefig(os.path.join(src_folder + '/../plots/', file_name))
-                # plt.close()
+                plt.savefig(os.path.join(src_folder + '/../plots/', file_name))
+                plt.close()
 
     f.close()
     print('Progress: {} out of {}\n'.format(file_number + 1, total_audio_files))

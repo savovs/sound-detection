@@ -3,7 +3,9 @@ from xml.etree import ElementTree
 
 import params
 
-# Get the audio directory path, place yours here
+# This file was used to fix formatting mistakes faster
+# in order to not run extract.py again since it's quite slow
+
 xml_path = os.path.dirname('../data/train/annotations/')
 
 labels = []

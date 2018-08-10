@@ -15,7 +15,7 @@
 
 """Global parameters."""
 
-AUDIO_PATH = 'E:/uniiii/UrbanSound/data'
+AUDIO_PATH = 'E:/path/to/UrbanSound/data'
 FILE_EXTENSION = '.wav'
 
 # Tweak this to control how bounding box sensitivity 
